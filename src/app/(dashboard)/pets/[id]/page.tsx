@@ -107,7 +107,7 @@ export default async function PetDetailPage({
             <div className="rounded-lg bg-gray-50 p-3">
               <p className="text-xs text-gray-500">Conditions</p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {pet.conditions.map((condition) => (
+                {pet.conditions.map((condition: string) => (
                   <span
                     key={condition}
                     className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700"

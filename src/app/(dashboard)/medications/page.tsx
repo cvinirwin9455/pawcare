@@ -125,7 +125,7 @@ export default async function MedicationsPage() {
                 </div>
                 {med.times_of_day && med.times_of_day.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {med.times_of_day.map((time) => (
+                    {med.times_of_day.map((time: string) => (
                       <span
                         key={time}
                         className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full"
