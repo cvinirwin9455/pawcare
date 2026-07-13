@@ -1,26 +1,31 @@
-# PawCare - Pet Health Management Platform
+# PawCare - Pet Care Management Platform
 
-A comprehensive platform for managing your pet's medications, appointments, and health records. Built for pet parents with older or special-needs pets.
+A comprehensive pet care management platform built with Next.js 14, Supabase, and Tailwind CSS. Track your pets' health, appointments, medications, and more.
 
 ## Features
 
-- **Pet Profiles** — Track multiple pets with conditions, weight, and health info
-- **Medication Management** — Dosages, schedules, refill tracking, and purpose descriptions
-- **Drug Interactions** — Manually log vet-provided interaction warnings with severity levels
-- **Appointment Scheduling** — Vet, physio, grooming, specialist, dental, vaccination
-- **Google Calendar Sync** — OAuth integration to auto-create calendar events
-- **Email Reminders** — Automated reminders via Resend for medications and appointments
-- **Multi-tenant Ready** — Row-level security, subscription tiers, profile management
+- **Pet Profiles** - Store all your pets' info (species, breed, weight, microchip, etc.)
+- **Appointments** - Schedule and track vet visits with status management
+- **Medications** - Track active medications with dosage and frequency
+- **Health Records** - Store vaccinations, lab results, diagnoses, and procedures
+- **Veterinarians** - Keep your vets' contact information organized
+- **Smart Reminders** - Set one-time or recurring reminders with email notifications
+- **Google Calendar Sync** - Sync appointments directly to your Google Calendar
+- **Email Notifications** - Automated reminders via Resend
+- **Responsive Design** - Works beautifully on desktop, tablet, and mobile
 
 ## Tech Stack
 
-- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Database:** Supabase (PostgreSQL) with Row Level Security
-- **Auth:** Supabase Auth (email/password)
-- **Email:** Resend API
-- **Calendar:** Google Calendar API (OAuth 2.0)
-- **Deployment:** Vercel with Cron Jobs
-- **Validation:** Zod + React Hook Form
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router) + TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| Email | Resend |
+| Calendar | Google Calendar API (OAuth 2.0) |
+| Deployment | Vercel |
+| Scheduling | Vercel Cron |
 
 ## Getting Started
 
@@ -29,82 +34,117 @@ A comprehensive platform for managing your pet's medications, appointments, and 
 - Node.js 18+
 - pnpm (recommended) or npm
 - Supabase account
-- Google Cloud Console project (for Calendar API)
-- Resend account (for emails)
+- Google Cloud Console project (for Calendar integration)
+- Resend account (for email notifications)
 
-### Setup
+### 1. Clone and Install
 
-1. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd pawcare
+```bash
+git clone <your-repo-url>
+cd pawcare
+pnpm install
+```
+
+### 2. Set Up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to SQL Editor and run the migration file:
    ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
+   supabase/migrations/001_initial_schema.sql
    ```
+3. Copy your project URL and anon key from Settings > API
 
-3. Copy environment variables:
-   ```bash
-   cp .env.local.example .env.local
-   ```
+### 3. Set Up Environment Variables
 
-4. Fill in your `.env.local` with:
-   - Supabase project URL and keys
-   - Google OAuth client ID/secret
-   - Resend API key
+```bash
+cp .env.local.example .env.local
+```
 
-5. Set up the database:
-   ```bash
-   # Apply migrations to your Supabase project
-   pnpm db:migrate
-   ```
+Fill in all the values in `.env.local`:
 
-6. Run the development server:
-   ```bash
-   pnpm dev
-   ```
+- **Supabase**: Get from your Supabase project Settings > API
+- **Google Calendar**: Create OAuth credentials in Google Cloud Console
+- **Resend**: Get API key from [resend.com](https://resend.com)
+- **CRON_SECRET**: Generate a random string for cron job authentication
 
-### Google Calendar Setup
+### 4. Set Up Google Calendar (Optional)
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Create a new project or select existing
 3. Enable the Google Calendar API
 4. Create OAuth 2.0 credentials (Web application)
-5. Add `http://localhost:3000/api/calendar/callback` as an authorized redirect URI
-6. Copy the client ID and secret to `.env.local`
+5. Add redirect URI: `http://localhost:3000/api/auth/google-calendar/callback`
+6. Copy Client ID and Client Secret to `.env.local`
 
-### Vercel Deployment
+### 5. Run Development Server
 
-1. Push to GitHub
-2. Import project in Vercel
-3. Add all environment variables
-4. Vercel will auto-configure the cron job from `vercel.json`
+```bash
+pnpm dev
+```
 
-Add `CRON_SECRET` to your environment variables to secure the reminders endpoint.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── (auth)/          # Login, signup, reset pages
-│   ├── (dashboard)/     # Protected app pages
-│   │   ├── dashboard/   # Main dashboard
-│   │   ├── pets/        # Pet CRUD
-│   │   ├── medications/ # Medication CRUD + interactions
-│   │   ├── appointments/# Appointment CRUD
-│   │   └── settings/    # Profile & integrations
-│   └── api/
-│       ├── auth/        # Auth callback
-│       ├── calendar/    # Google Calendar OAuth + events
-│       └── reminders/   # Cron-triggered email reminders
-├── components/          # Reusable UI components
-├── lib/                 # Utilities, Supabase, email, calendar
-└── types/               # TypeScript types
+pawcare/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/           # Auth pages (login, signup, reset-password)
+│   │   ├── api/              # API routes (cron, Google Calendar OAuth)
+│   │   ├── dashboard/        # Protected dashboard pages
+│   │   │   ├── pets/         # Pet CRUD
+│   │   │   ├── appointments/ # Appointment management
+│   │   │   ├── medications/  # Medication tracking
+│   │   │   ├── health-records/ # Health record storage
+│   │   │   ├── vets/         # Veterinarian contacts
+│   │   │   ├── reminders/    # Reminder system
+│   │   │   └── settings/     # User settings
+│   │   ├── page.tsx          # Landing page
+│   │   └── layout.tsx        # Root layout
+│   ├── components/ui/        # shadcn/ui components
+│   ├── hooks/                # Custom React hooks
+│   └── lib/
+│       ├── supabase/         # Supabase client (server, client, middleware)
+│       ├── types/            # TypeScript types & database schema
+│       ├── email.ts          # Resend email templates
+│       ├── google-calendar.ts # Google Calendar integration
+│       ├── utils.ts          # Utility functions
+│       └── validations.ts    # Zod schemas
+├── supabase/
+│   └── migrations/           # SQL migration files
+├── vercel.json               # Cron job configuration
+└── package.json
 ```
+
+## Deployment
+
+### Deploy to Vercel
+
+1. Push to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add all environment variables from `.env.local`
+4. Update `NEXT_PUBLIC_APP_URL` to your production URL
+5. Update `GOOGLE_REDIRECT_URI` to your production callback URL
+6. Deploy!
+
+The cron job for reminders will automatically run every 15 minutes (configured in `vercel.json`).
+
+## Database Schema
+
+The app uses 8 main tables with Row Level Security (RLS):
+
+- `profiles` - User profiles (extends Supabase auth)
+- `pets` - Pet profiles
+- `veterinarians` - Vet contact info
+- `appointments` - Scheduled appointments
+- `medications` - Active/past medications
+- `health_records` - Medical history
+- `reminders` - Notification reminders
+- `feeding_schedules` - Feeding routines
+
+All tables have RLS policies ensuring users can only access their own data.
 
 ## License
 
-Private - All rights reserved.
+MIT

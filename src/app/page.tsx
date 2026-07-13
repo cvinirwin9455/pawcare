@@ -1,91 +1,141 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  PawPrint,
+  Calendar,
+  Bell,
+  FileHeart,
+  Shield,
+  Smartphone,
+} from "lucide-react";
 
 export default function HomePage() {
+  const features = [
+    {
+      icon: PawPrint,
+      title: "Pet Profiles",
+      description: "Keep all your pets' info organized in one place",
+    },
+    {
+      icon: Calendar,
+      title: "Appointments",
+      description: "Schedule and track vet visits with Google Calendar sync",
+    },
+    {
+      icon: Bell,
+      title: "Smart Reminders",
+      description: "Never miss a medication, feeding, or appointment",
+    },
+    {
+      icon: FileHeart,
+      title: "Health Records",
+      description: "Store vaccinations, lab results, and medical history",
+    },
+    {
+      icon: Shield,
+      title: "Secure & Private",
+      description: "Your data is protected with enterprise-grade security",
+    },
+    {
+      icon: Smartphone,
+      title: "Access Anywhere",
+      description: "Fully responsive - works on desktop, tablet, and phone",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="border-b bg-white">
+        <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🐾</span>
-            <span className="text-xl font-bold text-purple-700">PawCare</span>
+            <span className="text-2xl">&#x1F43E;</span>
+            <span className="text-xl font-bold text-primary">PawCare</span>
           </div>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-600 hover:text-purple-700"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
-            >
-              Get Started
-            </Link>
-          </nav>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/signup">Get Started</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Complete care for your
-            <span className="text-purple-600"> beloved pets</span>
+      {/* Hero */}
+      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 via-white to-blue-50">
+        <div className="container mx-auto text-center max-w-3xl">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Everything your pet needs,
+            <span className="text-primary"> all in one place</span>
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
-            Track medications, manage appointments, get reminders, and
-            understand drug interactions — all in one place. Built for pet
-            parents who want the best for their furry family members.
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            PawCare helps you manage your pet&apos;s health, appointments,
+            medications, and daily care routines. Be the best pet parent you
+            can be.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <Link
-              href="/sign-up"
-              className="rounded-lg bg-purple-600 px-8 py-3 text-base font-semibold text-white shadow-sm hover:bg-purple-700 transition-colors"
-            >
-              Start Free
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-lg border border-gray-300 px-8 py-3 text-base font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Sign In
-            </Link>
+          <div className="flex gap-4 justify-center">
+            <Button size="lg" asChild>
+              <Link href="/signup">Start Free</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
           </div>
         </div>
+      </section>
 
-        <div className="mt-20 grid gap-8 md:grid-cols-3">
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-4 text-3xl">💊</div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Medication Tracking
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Track dosages, schedules, interactions, and get timely reminders.
-              Never miss a dose again.
-            </p>
-          </div>
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-4 text-3xl">📅</div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Smart Appointments
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Schedule vet visits, physio sessions, and more. Auto-sync with
-              Google Calendar.
-            </p>
-          </div>
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-4 text-3xl">🔔</div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Email Reminders
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Get email alerts for medications, appointments, and refills.
-              Customizable timing.
-            </p>
+      {/* Features */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Everything you need to care for your pets
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <div key={feature.title} className="text-center p-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-4">
+                  <feature.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 px-4 bg-primary text-white">
+        <div className="container mx-auto text-center max-w-2xl">
+          <h2 className="text-3xl font-bold mb-4">
+            Ready to simplify pet care?
+          </h2>
+          <p className="text-lg opacity-90 mb-8">
+            Join thousands of pet parents who use PawCare to keep their
+            furry friends healthy and happy.
+          </p>
+          <Button size="lg" variant="secondary" asChild>
+            <Link href="/signup">Get Started for Free</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-4 border-t">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">&#x1F43E;</span>
+            <span className="font-semibold text-primary">PawCare</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} PawCare. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

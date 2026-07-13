@@ -3,121 +3,105 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const supabase = createClient();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError("");
 
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/settings`,
-      });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
-
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
       setSuccess(true);
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
       setLoading(false);
     }
   };
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-violet-50 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="text-5xl mb-4">✉️</div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Check your email
-          </h1>
-          <p className="mt-2 text-gray-600">
-            We've sent a password reset link to <strong>{email}</strong>.
-          </p>
-          <Link
-            href="/login"
-            className="mt-6 inline-block text-sm font-medium text-purple-600 hover:text-purple-700"
-          >
-            Back to Sign In
+      <Card className="shadow-lg">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 text-4xl">&#x2709;&#xFE0F;</div>
+          <CardTitle className="text-2xl">Check your email</CardTitle>
+          <CardDescription>
+            We&apos;ve sent a password reset link to <strong>{email}</strong>.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="justify-center">
+          <Link href="/login" className="text-primary hover:underline text-sm">
+            Back to sign in
           </Link>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-violet-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-3xl">🐾</span>
-            <span className="text-2xl font-bold text-purple-700">PawCare</span>
-          </Link>
-          <h1 className="mt-6 text-2xl font-bold text-gray-900">
-            Reset your password
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Enter your email and we'll send you a reset link
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl border shadow-sm p-8">
-          <form onSubmit={handleReset} className="space-y-4">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-colors"
-                placeholder="you@example.com"
-              />
+    <Card className="shadow-lg">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 text-4xl">&#x1F510;</div>
+        <CardTitle className="text-2xl">Reset password</CardTitle>
+        <CardDescription>
+          Enter your email and we&apos;ll send you a reset link
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleReset}>
+        <CardContent className="space-y-4">
+          {error && (
+            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+              {error}
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Sending..." : "Send Reset Link"}
-            </button>
-          </form>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Remember your password?{" "}
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Send Reset Link
+          </Button>
           <Link
             href="/login"
-            className="font-medium text-purple-600 hover:text-purple-700"
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
           >
-            Sign in
+            <ArrowLeft className="h-3 w-3" />
+            Back to sign in
           </Link>
-        </p>
-      </div>
-    </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

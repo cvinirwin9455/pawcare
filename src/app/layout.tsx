@@ -5,9 +5,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PawCare - Pet Health Management",
+  title: "PawCare - Pet Care Management",
   description:
-    "Manage your pet's medications, appointments, and health all in one place.",
+    "Track your pet's health, appointments, medications, and more. Your all-in-one pet care companion.",
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>{children}</body>
     </html>
   );

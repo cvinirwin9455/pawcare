@@ -4,129 +4,106 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError("");
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
-
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-violet-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-3xl">🐾</span>
-            <span className="text-2xl font-bold text-purple-700">PawCare</span>
-          </Link>
-          <h1 className="mt-6 text-2xl font-bold text-gray-900">
-            Welcome back
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your pet's health
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl border shadow-sm p-8">
-          <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-colors"
-                placeholder="you@example.com"
-              />
+    <Card className="shadow-lg">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 text-4xl">&#x1F43E;</div>
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription>
+          Sign in to your PawCare account
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleLogin}>
+        <CardContent className="space-y-4">
+          {error && (
+            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+              {error}
             </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-colors"
-                placeholder="Your password"
-              />
-            </div>
-
-            <div className="flex items-center justify-end">
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
               <Link
                 href="/reset-password"
-                className="text-sm text-purple-600 hover:text-purple-700"
+                className="text-xs text-primary hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link
-            href="/sign-up"
-            className="font-medium text-purple-600 hover:text-purple-700"
-          >
-            Sign up
-          </Link>
-        </p>
-      </div>
-    </div>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign In
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-primary hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }
