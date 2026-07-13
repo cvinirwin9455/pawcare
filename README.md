@@ -1,4 +1,6 @@
-# PawCare - Pet Health Management Platform
+# PawCare
+
+A comprehensive pet care management platform built with Next.js 14, Supabase, and Tailwind CSS. - Pet Health Management Platform
 
 A comprehensive platform for managing your pet's medications, appointments, and health records. Built for pet parents with older or special-needs pets.
 
