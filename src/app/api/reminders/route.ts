@@ -3,10 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 import { sendEmail, buildMedicationReminderEmail, buildAppointmentReminderEmail } from "@/lib/email";
 import { getAppointmentTypeLabel, formatDateTime } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 // This endpoint is called by Vercel Cron
 // Vercel cron config in vercel.json triggers this every 15 minutes
 
-const supabaseAdmin = createClient(
+const getSupabaseAdmin = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     const fifteenMinutesFromNow = new Date(now.getTime() + 15 * 60000);
 
     // Get pending reminders that should be sent now
-    const { data: reminders, error } = await supabaseAdmin
+    const { data: reminders, error } = await getSupabaseAdmin()
       .from("reminders")
       .select("*, profiles:user_id(email, reminder_email), pets(name)")
       .eq("status", "pending")
@@ -50,7 +52,7 @@ export async function GET(request: Request) {
 
         if (reminder.type === "medication") {
           // Fetch medication details
-          const { data: med } = await supabaseAdmin
+          const { data: med } = await getSupabaseAdmin()
             .from("medications")
             .select("*")
             .eq("id", reminder.reference_id)
@@ -66,7 +68,7 @@ export async function GET(request: Request) {
             time: formatDateTime(reminder.scheduled_at),
           });
         } else if (reminder.type === "appointment") {
-          const { data: apt } = await supabaseAdmin
+          const { data: apt } = await getSupabaseAdmin()
             .from("appointments")
             .select("*")
             .eq("id", reminder.reference_id)
@@ -92,7 +94,7 @@ export async function GET(request: Request) {
             html: emailContent.html,
           });
 
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from("reminders")
             .update({ status: "sent", sent_at: new Date().toISOString() })
             .eq("id", reminder.id);
@@ -101,7 +103,7 @@ export async function GET(request: Request) {
         }
       } catch (emailError) {
         console.error(`Failed to send reminder ${reminder.id}:`, emailError);
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from("reminders")
           .update({ status: "failed" })
           .eq("id", reminder.id);
