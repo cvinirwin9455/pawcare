@@ -31,7 +31,7 @@ export default function NewAppointmentPage() {
       ]);
 
       setPets(petsRes.data || []);
-      setHasCalendar(!!(profileRes.data as any)?.google_calendar_token);
+      setHasCalendar(!!profileRes.data?.google_calendar_token);
     }
     fetchData();
   }, []);
