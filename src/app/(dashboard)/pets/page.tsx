@@ -3,6 +3,8 @@ import Link from "next/link";
 import { calculateAge } from "@/lib/utils";
 import { PetCard } from "@/components/pets/PetCard";
 
+export const dynamic = "force-dynamic";
+
 export default async function PetsPage() {
   const supabase = createServerSupabaseClient();
   const {

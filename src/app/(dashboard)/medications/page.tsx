@@ -2,6 +2,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { getFrequencyLabel, getSeverityColor } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function MedicationsPage() {
   const supabase = createServerSupabaseClient();
   const {

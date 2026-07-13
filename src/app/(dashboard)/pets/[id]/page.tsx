@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { calculateAge, getFrequencyLabel } from "@/lib/utils";
 import { DeletePetButton } from "@/components/pets/DeletePetButton";
 
