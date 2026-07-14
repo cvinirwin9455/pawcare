@@ -10,7 +10,7 @@ interface SendEmailOptions {
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || "PawCare <reminders@pawcare.app>",
+    from: process.env.RESEND_FROM_EMAIL || "Paw Tender Care <reminders@pawtendercare.com>",
     to,
     subject,
     html,
@@ -32,7 +32,7 @@ export function buildMedicationReminderEmail(params: {
   time: string;
 }) {
   return {
-    subject: `PawCare Reminder: ${params.medicationName} for ${params.petName}`,
+    subject: `Paw Tender Care Reminder: ${params.medicationName} for ${params.petName}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -43,7 +43,7 @@ export function buildMedicationReminderEmail(params: {
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background-color: #f9fafb;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: #7c3aed; margin: 0; font-size: 24px;">PawCare</h1>
+            <h1 style="color: #7c3aed; margin: 0; font-size: 24px;">Paw Tender Care</h1>
             <p style="color: #6b7280; margin: 4px 0 0;">Medication Reminder</p>
           </div>
           
@@ -74,7 +74,7 @@ export function buildMedicationReminderEmail(params: {
           </div>
           
           <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 24px 0 0;">
-            You received this email because you have medication reminders enabled in PawCare.
+            You received this email because you have medication reminders enabled in Paw Tender Care.
           </p>
         </div>
       </body>
@@ -93,7 +93,7 @@ export function buildAppointmentReminderEmail(params: {
   notes?: string;
 }) {
   return {
-    subject: `PawCare Reminder: ${params.appointmentTitle} for ${params.petName} tomorrow`,
+    subject: `Paw Tender Care Reminder: ${params.appointmentTitle} for ${params.petName} tomorrow`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -104,7 +104,7 @@ export function buildAppointmentReminderEmail(params: {
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background-color: #f9fafb;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: #7c3aed; margin: 0; font-size: 24px;">PawCare</h1>
+            <h1 style="color: #7c3aed; margin: 0; font-size: 24px;">Paw Tender Care</h1>
             <p style="color: #6b7280; margin: 4px 0 0;">Appointment Reminder</p>
           </div>
           
@@ -147,7 +147,7 @@ export function buildAppointmentReminderEmail(params: {
           </div>
           
           <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 24px 0 0;">
-            You received this email because you have appointment reminders enabled in PawCare.
+            You received this email because you have appointment reminders enabled in Paw Tender Care.
           </p>
         </div>
       </body>

@@ -7,7 +7,7 @@ export default function HomePage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🐾</span>
-            <span className="text-xl font-bold text-purple-700">PawCare</span>
+            <span className="text-xl font-bold text-purple-700">Paw Tender Care</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link

@@ -20,7 +20,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col border-r bg-white">
         <div className="flex h-16 items-center gap-2 border-b px-6">
           <span className="text-2xl">🐾</span>
-          <span className="text-xl font-bold text-purple-700">PawCare</span>
+          <span className="text-xl font-bold text-purple-700">Paw Tender Care</span>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">

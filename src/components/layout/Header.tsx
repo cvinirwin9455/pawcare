@@ -24,7 +24,7 @@ export function Header({ user, profile }: HeaderProps) {
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <div className="flex items-center gap-4 md:hidden">
         <span className="text-xl">🐾</span>
-        <span className="font-bold text-purple-700">PawCare</span>
+        <span className="font-bold text-purple-700">Paw Tender Care</span>
       </div>
 
       <div className="hidden md:block">

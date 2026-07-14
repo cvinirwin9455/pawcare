@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <span className="text-3xl">🐾</span>
-            <span className="text-2xl font-bold text-purple-700">PawCare</span>
+            <span className="text-2xl font-bold text-purple-700">Paw Tender Care</span>
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">
             Welcome back
