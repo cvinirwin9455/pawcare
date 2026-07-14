@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { getFrequencyLabel, getSeverityColor, formatDate } from "@/lib/utils";
 
 export default async function MedicationDetailPage({
@@ -115,7 +117,7 @@ export default async function MedicationDetailPage({
           <div className="mt-4">
             <p className="text-xs text-gray-500 mb-2">Schedule</p>
             <div className="flex flex-wrap gap-2">
-              {medication.times_of_day.map((time) => (
+              {medication.times_of_day.map((time: string) => (
                 <span
                   key={time}
                   className="inline-flex items-center rounded-full bg-purple-50 px-3 py-1 text-sm font-medium text-purple-700"
