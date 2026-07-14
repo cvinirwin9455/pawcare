@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Paw Tender Care - Pet Health Management",
   description:
     "Manage your pet's medications, appointments, and health all in one place.",
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
 };
 
 export default function RootLayout({
