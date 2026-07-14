@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PawCare - Pet Health Management",
+  title: "PawTenderCare - Pet Health Management",
   description:
     "Manage your pet's medications, appointments, and health all in one place.",
 };

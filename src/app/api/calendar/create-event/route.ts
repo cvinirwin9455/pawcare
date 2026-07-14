@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     };
 
     const event = await createCalendarEvent(tokens, {
-      summary: `[PawCare] ${title}`,
+      summary: `[PawTenderCare] ${title}`,
       description,
       location,
       start: new Date(dateTime),

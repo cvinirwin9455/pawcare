@@ -1,6 +1,8 @@
-# PawCare - Pet Health Management Platform
+# PawTenderCare - Pet Health Management Platform
 
 A comprehensive platform for managing your pet's medications, appointments, and health records. Built for pet parents with older or special-needs pets.
+
+**Domain:** [PawTenderCare.com](https://pawtendercare.com)
 
 ## Features
 
@@ -74,6 +76,27 @@ A comprehensive platform for managing your pet's medications, appointments, and 
 4. Create OAuth 2.0 credentials (Web application)
 5. Add `http://localhost:3000/api/calendar/callback` as an authorized redirect URI
 6. Copy the client ID and secret to `.env.local`
+
+### Resend Email Setup
+
+PawTenderCare uses [Resend](https://resend.com) for all outbound email (medication reminders, appointment alerts). To also fix Supabase Auth email rate limits (sign-up, password reset), configure Resend as a custom SMTP in Supabase:
+
+1. Go to [Resend Dashboard](https://resend.com/domains) and add your domain (`pawtendercare.com`)
+2. Add the DNS records Resend gives you (SPF, DKIM, etc.)
+3. Once verified, go to Resend > SMTP and note:
+   - Host: `smtp.resend.com`
+   - Port: `465`
+   - Username: `resend`
+   - Password: your Resend API key
+4. In **Supabase Dashboard** > Project Settings > Auth > SMTP Settings:
+   - Enable "Custom SMTP"
+   - Sender email: `noreply@pawtendercare.com`
+   - Sender name: `PawTenderCare`
+   - Host: `smtp.resend.com`
+   - Port: `465`
+   - Username: `resend`
+   - Password: your Resend API key
+5. This removes the Supabase 4 emails/hour rate limit entirely
 
 ### Vercel Deployment
 
