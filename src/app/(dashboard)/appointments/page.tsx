@@ -1,30 +1,49 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { getAppointmentTypeLabel, getStatusColor, formatDateTime } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export default function AppointmentsPage() {
+  const [upcoming, setUpcoming] = useState<any[]>([]);
+  const [past, setPast] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-export default async function AppointmentsPage() {
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const { data: upcoming } = await supabase
-    .from("appointments")
-    .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
-    .eq("status", "scheduled")
-    .gte("date_time", new Date().toISOString())
-    .order("date_time", { ascending: true });
+      const [upcomingRes, pastRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("*, pets(name, species)")
+          .eq("user_id", user.id)
+          .eq("status", "scheduled")
+          .gte("date_time", new Date().toISOString())
+          .order("date_time", { ascending: true }),
+        supabase
+          .from("appointments")
+          .select("*, pets(name, species)")
+          .eq("user_id", user.id)
+          .or("status.eq.completed,status.eq.cancelled")
+          .order("date_time", { ascending: false })
+          .limit(10),
+      ]);
 
-  const { data: past } = await supabase
-    .from("appointments")
-    .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
-    .or("status.eq.completed,status.eq.cancelled")
-    .order("date_time", { ascending: false })
-    .limit(10);
+      setUpcoming(upcomingRes.data || []);
+      setPast(pastRes.data || []);
+      setLoading(false);
+    };
+
+    fetchAppointments();
+  }, []);
+
+  if (loading) {
+    return <div className="animate-pulse text-gray-400">Loading appointments...</div>;
+  }
 
   return (
     <div>
@@ -48,7 +67,7 @@ export default async function AppointmentsPage() {
         <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
           Upcoming
         </h2>
-        {!upcoming || upcoming.length === 0 ? (
+        {upcoming.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border">
             <div className="text-5xl mb-4">📅</div>
             <h3 className="text-lg font-medium text-gray-900">
@@ -67,10 +86,9 @@ export default async function AppointmentsPage() {
         ) : (
           <div className="space-y-3">
             {upcoming.map((apt) => (
-              <Link
+              <div
                 key={apt.id}
-                href={`/appointments/${apt.id}`}
-                className="block bg-white rounded-xl border shadow-sm p-5 hover:shadow-md transition-shadow"
+                className="block bg-white rounded-xl border shadow-sm p-5"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -79,7 +97,7 @@ export default async function AppointmentsPage() {
                         {apt.title}
                       </h3>
                       <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                        {(apt as any).pets?.name}
+                        {apt.pets?.name}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
@@ -104,31 +122,30 @@ export default async function AppointmentsPage() {
                     )}
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
       </div>
 
       {/* Past Appointments */}
-      {past && past.length > 0 && (
+      {past.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
             Past Appointments
           </h2>
           <div className="space-y-2">
             {past.map((apt) => (
-              <Link
+              <div
                 key={apt.id}
-                href={`/appointments/${apt.id}`}
-                className="block bg-white rounded-lg border p-4 hover:bg-gray-50 transition-colors opacity-75"
+                className="block bg-white rounded-lg border p-4 opacity-75"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">{apt.title}</h3>
                     <p className="text-sm text-gray-500">
                       {formatDateTime(apt.date_time)} &middot;{" "}
-                      {(apt as any).pets?.name}
+                      {apt.pets?.name}
                     </p>
                   </div>
                   <span
@@ -137,7 +154,7 @@ export default async function AppointmentsPage() {
                     {apt.status}
                   </span>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

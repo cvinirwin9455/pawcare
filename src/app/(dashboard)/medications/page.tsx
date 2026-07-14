@@ -1,26 +1,45 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { getFrequencyLabel, getSeverityColor } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export default function MedicationsPage() {
+  const [medications, setMedications] = useState<any[]>([]);
+  const [interactions, setInteractions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-export default async function MedicationsPage() {
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const { data: medications } = await supabase
-    .from("medications")
-    .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
+      const [medsRes, interactionsRes] = await Promise.all([
+        supabase
+          .from("medications")
+          .select("*, pets(name, species)")
+          .eq("user_id", user.id)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("drug_interactions")
+          .select("*, medication_a:medications!medication_a_id(name), medication_b:medications!medication_b_id(name)")
+          .eq("user_id", user.id),
+      ]);
 
-  const { data: interactions } = await supabase
-    .from("drug_interactions")
-    .select("*, medication_a:medications!medication_a_id(name), medication_b:medications!medication_b_id(name)")
-    .eq("user_id", user!.id);
+      setMedications(medsRes.data || []);
+      setInteractions(interactionsRes.data || []);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="animate-pulse text-gray-400">Loading medications...</div>;
+  }
 
   return (
     <div>
@@ -48,7 +67,7 @@ export default async function MedicationsPage() {
       </div>
 
       {/* Drug Interaction Warnings */}
-      {interactions && interactions.length > 0 && (
+      {interactions.length > 0 && (
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-gray-700 mb-3">
             Drug Interaction Warnings
@@ -62,8 +81,8 @@ export default async function MedicationsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="font-medium text-sm">
-                      {(interaction.medication_a as any)?.name} &harr;{" "}
-                      {(interaction.medication_b as any)?.name}
+                      {interaction.medication_a?.name} &harr;{" "}
+                      {interaction.medication_b?.name}
                     </span>
                     <span className="ml-2 text-xs uppercase font-semibold">
                       ({interaction.severity})
@@ -83,7 +102,7 @@ export default async function MedicationsPage() {
       )}
 
       {/* Medications List */}
-      {!medications || medications.length === 0 ? (
+      {medications.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border">
           <div className="text-5xl mb-4">💊</div>
           <h3 className="text-lg font-medium text-gray-900">
@@ -112,7 +131,7 @@ export default async function MedicationsPage() {
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-gray-900">{med.name}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                      {(med as any).pets?.name}
+                      {med.pets?.name}
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">

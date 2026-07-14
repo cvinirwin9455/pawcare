@@ -1,47 +1,78 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { calculateAge, getFrequencyLabel } from "@/lib/utils";
 import { DeletePetButton } from "@/components/pets/DeletePetButton";
 
-export default async function PetDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function PetDetailPage() {
+  const params = useParams();
+  const [pet, setPet] = useState<any>(null);
+  const [medications, setMedications] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-  const { data: pet } = await supabase
-    .from("pets")
-    .select("*")
-    .eq("id", params.id)
-    .eq("user_id", user!.id)
-    .single();
+  useEffect(() => {
+    const fetchPet = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  if (!pet) {
-    notFound();
+      const { data: petData } = await supabase
+        .from("pets")
+        .select("*")
+        .eq("id", params.id as string)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!petData) {
+        setLoading(false);
+        return;
+      }
+
+      setPet(petData);
+
+      const [medsRes, aptsRes] = await Promise.all([
+        supabase
+          .from("medications")
+          .select("*")
+          .eq("pet_id", petData.id)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("appointments")
+          .select("*")
+          .eq("pet_id", petData.id)
+          .eq("status", "scheduled")
+          .gte("date_time", new Date().toISOString())
+          .order("date_time", { ascending: true })
+          .limit(5),
+      ]);
+
+      setMedications(medsRes.data || []);
+      setAppointments(aptsRes.data || []);
+      setLoading(false);
+    };
+
+    fetchPet();
+  }, [params.id]);
+
+  if (loading) {
+    return <div className="animate-pulse text-gray-400">Loading pet details...</div>;
   }
 
-  const { data: medications } = await supabase
-    .from("medications")
-    .select("*")
-    .eq("pet_id", pet.id)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
-
-  const { data: appointments } = await supabase
-    .from("appointments")
-    .select("*")
-    .eq("pet_id", pet.id)
-    .eq("status", "scheduled")
-    .gte("date_time", new Date().toISOString())
-    .order("date_time", { ascending: true })
-    .limit(5);
+  if (!pet) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Pet not found.</p>
+        <Link href="/pets" className="text-purple-600 hover:text-purple-700 text-sm mt-2 inline-block">
+          Back to Pets
+        </Link>
+      </div>
+    );
+  }
 
   const speciesEmoji: Record<string, string> = {
     dog: "🐕",
@@ -144,7 +175,7 @@ export default async function PetDetailPage({
           </Link>
         </div>
 
-        {!medications || medications.length === 0 ? (
+        {medications.length === 0 ? (
           <p className="text-sm text-gray-500">No active medications.</p>
         ) : (
           <div className="space-y-3">
@@ -188,15 +219,14 @@ export default async function PetDetailPage({
           </Link>
         </div>
 
-        {!appointments || appointments.length === 0 ? (
+        {appointments.length === 0 ? (
           <p className="text-sm text-gray-500">No upcoming appointments.</p>
         ) : (
           <div className="space-y-3">
             {appointments.map((apt) => (
-              <Link
+              <div
                 key={apt.id}
-                href={`/appointments/${apt.id}`}
-                className="block rounded-lg border p-4 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border p-4"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -215,7 +245,7 @@ export default async function PetDetailPage({
                     {apt.type}
                   </span>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
