@@ -17,11 +17,26 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  // Fetch profile — create one if it doesn't exist (handles missing trigger)
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (!profile) {
+    // Profile doesn't exist — auto-create it
+    const { data: newProfile } = await supabase
+      .from("profiles")
+      .insert({
+        id: user.id,
+        email: user.email!,
+        full_name: user.user_metadata?.full_name || null,
+      })
+      .select()
+      .single();
+    profile = newProfile;
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">

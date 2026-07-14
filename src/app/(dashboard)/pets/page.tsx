@@ -9,10 +9,14 @@ export default async function PetsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return null;
+  }
+
   const { data: pets } = await supabase
     .from("pets")
     .select("*")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 

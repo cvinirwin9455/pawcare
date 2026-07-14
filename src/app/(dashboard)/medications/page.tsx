@@ -8,17 +8,21 @@ export default async function MedicationsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return null;
+  }
+
   const { data: medications } = await supabase
     .from("medications")
     .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 
   const { data: interactions } = await supabase
     .from("drug_interactions")
     .select("*, medication_a:medications!medication_a_id(name), medication_b:medications!medication_b_id(name)")
-    .eq("user_id", user!.id);
+    .eq("user_id", user.id);
 
   return (
     <div>

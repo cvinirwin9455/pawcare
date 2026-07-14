@@ -8,6 +8,10 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return null;
+  }
+
   const now = new Date().toISOString();
 
   // Fetch dashboard data in parallel
@@ -16,19 +20,19 @@ export default async function DashboardPage() {
       supabase
         .from("pets")
         .select("*")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .eq("is_active", true),
       supabase
         .from("medications")
         .select("*, pets(name)")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(5),
       supabase
         .from("appointments")
         .select("*, pets(name)")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .eq("status", "scheduled")
         .gte("date_time", now)
         .order("date_time", { ascending: true })
@@ -38,7 +42,7 @@ export default async function DashboardPage() {
         .select(
           "*, medication_a:medications!medication_a_id(name), medication_b:medications!medication_b_id(name)"
         )
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .in("severity", ["moderate", "severe"]),
     ]);
 

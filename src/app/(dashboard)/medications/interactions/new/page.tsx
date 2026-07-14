@@ -50,7 +50,7 @@ export default function NewInteractionPage() {
       const { error: dbError } = await supabase
         .from("drug_interactions")
         .insert({
-          user_id: user!.id,
+          user_id: user?.id,
           medication_a_id: medAId,
           medication_b_id: medBId,
           severity: severity as "mild" | "moderate" | "severe",

@@ -8,10 +8,14 @@ export default async function AppointmentsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return null;
+  }
+
   const { data: upcoming } = await supabase
     .from("appointments")
     .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .eq("status", "scheduled")
     .gte("date_time", new Date().toISOString())
     .order("date_time", { ascending: true });
@@ -19,7 +23,7 @@ export default async function AppointmentsPage() {
   const { data: past } = await supabase
     .from("appointments")
     .select("*, pets(name, species)")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .or("status.eq.completed,status.eq.cancelled")
     .order("date_time", { ascending: false })
     .limit(10);

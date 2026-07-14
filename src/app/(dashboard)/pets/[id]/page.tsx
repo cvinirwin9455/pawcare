@@ -14,11 +14,15 @@ export default async function PetDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    notFound();
+  }
+
   const { data: pet } = await supabase
     .from("pets")
     .select("*")
     .eq("id", params.id)
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .single();
 
   if (!pet) {
