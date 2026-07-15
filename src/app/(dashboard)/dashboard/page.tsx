@@ -60,8 +60,8 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch all data in parallel
-    const [petsRes, medsRes, aptsRes, careTasksRes, completionsRes] = await Promise.all([
+    // Fetch all data in parallel - care_tasks and task_completions may not exist yet
+    const [petsRes, medsRes, aptsRes] = await Promise.all([
       supabase.from("pets").select("*").eq("user_id", user.id).eq("is_active", true).order("name"),
       supabase.from("medications").select("*, pets(name, species)").eq("user_id", user.id).eq("is_active", true),
       supabase
@@ -71,15 +71,27 @@ export default function DashboardPage() {
         .eq("status", "scheduled")
         .gte("date_time", `${todayStr}T00:00:00`)
         .lte("date_time", `${todayStr}T23:59:59`),
-      supabase.from("care_tasks").select("*, pets(name, species)").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("task_completions").select("*").eq("user_id", user.id).eq("scheduled_date", todayStr),
     ]);
+
+    // These tables may not exist yet if migration hasn't been run
+    let careTasksData: any[] = [];
+    let completionsData: TaskCompletion[] = [];
+
+    try {
+      const [careTasksRes, completionsRes] = await Promise.all([
+        supabase.from("care_tasks").select("*, pets(name, species)").eq("user_id", user.id).eq("is_active", true),
+        supabase.from("task_completions").select("*").eq("user_id", user.id).eq("scheduled_date", todayStr),
+      ]);
+      careTasksData = careTasksRes.data || [];
+      completionsData = (completionsRes.data || []) as TaskCompletion[];
+    } catch (err) {
+      // Tables don't exist yet - that's okay, just use empty arrays
+      console.warn("care_tasks/task_completions tables not available:", err);
+    }
 
     const petsData = (petsRes.data || []) as Pet[];
     const medsData = (medsRes.data || []) as any[];
     const aptsData = (aptsRes.data || []) as any[];
-    const careTasksData = (careTasksRes.data || []) as any[];
-    const completionsData = (completionsRes.data || []) as TaskCompletion[];
 
     setPets(petsData);
     setCompletions(completionsData);
@@ -206,24 +218,28 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    if (task.isCompleted && task.completionId) {
-      // Un-complete: delete the completion record
-      await supabase.from("task_completions").delete().eq("id", task.completionId);
-    } else {
-      // Complete: insert a completion record
-      await supabase.from("task_completions").insert({
-        user_id: user.id,
-        care_task_id: task.sourceType === "care_task" ? task.sourceId : null,
-        pet_id: task.petId,
-        source_type: task.sourceType,
-        source_id: task.sourceId,
-        scheduled_date: todayStr,
-        scheduled_time: task.scheduledTime || null,
-      });
-    }
+    try {
+      if (task.isCompleted && task.completionId) {
+        // Un-complete: delete the completion record
+        await supabase.from("task_completions").delete().eq("id", task.completionId);
+      } else {
+        // Complete: insert a completion record
+        await supabase.from("task_completions").insert({
+          user_id: user.id,
+          care_task_id: task.sourceType === "care_task" ? task.sourceId : null,
+          pet_id: task.petId,
+          source_type: task.sourceType,
+          source_id: task.sourceId,
+          scheduled_date: todayStr,
+          scheduled_time: task.scheduledTime || null,
+        });
+      }
 
-    // Refresh data
-    await fetchData();
+      // Refresh data
+      await fetchData();
+    } catch (err) {
+      console.error("Failed to toggle task:", err);
+    }
   };
 
   // Calculate task counts per pet for the sidebar
