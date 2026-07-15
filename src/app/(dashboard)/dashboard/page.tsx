@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PetSidebar } from "@/components/dashboard/PetSidebar";
 import { AddTaskModal } from "@/components/dashboard/AddTaskModal";
-import { cn, formatDate, formatTime, getFrequencyLabel } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import type { Pet, Medication, Appointment, CareTask, TaskCompletion } from "@/types/database";
 
 // A unified task item for the checklist
@@ -295,7 +295,7 @@ export default function DashboardPage() {
               {selectedPet ? `${selectedPet.name}'s Care` : "Today's Care Tasks"}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              {formatDate(new Date(), { weekday: "long", month: "long", day: "numeric" })}
+              {new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date())}
               {filteredTasks.length > 0 && (
                 <span className="ml-2">
                   &middot; {incompleteTasks.length} remaining
