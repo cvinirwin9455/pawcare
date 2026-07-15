@@ -277,7 +277,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-full -m-4 md:-m-6">
+    <div className="flex h-full">
       {/* Pet Sidebar */}
       <PetSidebar
         pets={pets}
@@ -287,17 +287,17 @@ export default function DashboardPage() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+      <div className="flex-1 overflow-y-auto p-5 md:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {selectedPet ? `${selectedPet.name}'s Care` : "Today's Care Tasks"}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-400 mt-1">
               {new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date())}
               {filteredTasks.length > 0 && (
-                <span className="ml-2">
+                <span className="ml-2 text-gray-500">
                   &middot; {incompleteTasks.length} remaining
                 </span>
               )}
@@ -305,7 +305,7 @@ export default function DashboardPage() {
           </div>
           <button
             onClick={() => setShowAddTask(true)}
-            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+            className="rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
           >
             + Add Task
           </button>
@@ -359,41 +359,45 @@ export default function DashboardPage() {
 
         {/* Empty State */}
         {filteredTasks.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-xl border">
-            <div className="text-5xl mb-4">
-              {selectedPet ? speciesEmoji[selectedPet.species] || "🐾" : "✨"}
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mb-6">
+              <span className="text-4xl">
+                {selectedPet ? speciesEmoji[selectedPet.species] || "🐾" : "🐾"}
+              </span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {selectedPet
                 ? `No tasks for ${selectedPet.name} today`
-                : "No tasks scheduled for today"}
+                : pets.length === 0
+                ? "Welcome to Paw Tender Care!"
+                : "All caught up!"}
             </h3>
-            <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
+            <p className="text-sm text-gray-500 max-w-sm mx-auto text-center mb-6">
               {pets.length === 0
-                ? "Add a pet to start tracking their care tasks."
-                : "Add care tasks, medications, or appointments to see them here."}
+                ? "Start by adding your first pet, then you can track their feeding, walks, medications, and appointments all in one place."
+                : "Add care tasks, medications, or appointments to see your daily checklist here."}
             </p>
-            <div className="mt-4 flex gap-2 justify-center">
+            <div className="flex gap-3">
               {pets.length === 0 ? (
                 <Link
                   href="/pets/new"
-                  className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                  className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
                 >
-                  Add Your First Pet
+                  + Add Your First Pet
                 </Link>
               ) : (
                 <>
                   <button
                     onClick={() => setShowAddTask(true)}
-                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                    className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
                   >
-                    Add Care Task
+                    + Add Care Task
                   </button>
                   <Link
                     href="/medications/new"
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    Add Medication
+                    + Add Medication
                   </Link>
                 </>
               )}
