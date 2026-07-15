@@ -271,6 +271,80 @@ export interface Database {
           message?: string;
         };
       };
+      care_tasks: {
+        Row: {
+          id: string;
+          user_id: string;
+          pet_id: string;
+          title: string;
+          category: "feeding" | "walking" | "medication" | "grooming" | "training" | "playtime" | "cleaning" | "custom";
+          frequency: "daily" | "twice_daily" | "three_times_daily" | "every_other_day" | "weekly" | "custom";
+          times_of_day: string[];
+          days_of_week: number[];
+          notes: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          pet_id: string;
+          title: string;
+          category?: "feeding" | "walking" | "medication" | "grooming" | "training" | "playtime" | "cleaning" | "custom";
+          frequency?: "daily" | "twice_daily" | "three_times_daily" | "every_other_day" | "weekly" | "custom";
+          times_of_day?: string[];
+          days_of_week?: number[];
+          notes?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          category?: "feeding" | "walking" | "medication" | "grooming" | "training" | "playtime" | "cleaning" | "custom";
+          frequency?: "daily" | "twice_daily" | "three_times_daily" | "every_other_day" | "weekly" | "custom";
+          times_of_day?: string[];
+          days_of_week?: number[];
+          notes?: string | null;
+          is_active?: boolean;
+          updated_at?: string;
+        };
+      };
+      task_completions: {
+        Row: {
+          id: string;
+          user_id: string;
+          care_task_id: string | null;
+          pet_id: string;
+          source_type: "care_task" | "medication" | "appointment";
+          source_id: string;
+          completed_at: string;
+          scheduled_date: string;
+          scheduled_time: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          care_task_id?: string | null;
+          pet_id: string;
+          source_type: "care_task" | "medication" | "appointment";
+          source_id: string;
+          completed_at?: string;
+          scheduled_date?: string;
+          scheduled_time?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          completed_at?: string;
+          scheduled_date?: string;
+          scheduled_time?: string | null;
+          notes?: string | null;
+        };
+      };
     };
   };
 }
@@ -282,3 +356,5 @@ export type Medication = Database["public"]["Tables"]["medications"]["Row"];
 export type DrugInteraction = Database["public"]["Tables"]["drug_interactions"]["Row"];
 export type Appointment = Database["public"]["Tables"]["appointments"]["Row"];
 export type Reminder = Database["public"]["Tables"]["reminders"]["Row"];
+export type CareTask = Database["public"]["Tables"]["care_tasks"]["Row"];
+export type TaskCompletion = Database["public"]["Tables"]["task_completions"]["Row"];

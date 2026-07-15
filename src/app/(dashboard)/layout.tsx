@@ -56,7 +56,9 @@ export default function DashboardLayout({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
+  const isDashboardHome = pathname === "/dashboard";
 
   useEffect(() => {
     const checkUser = async () => {
@@ -95,29 +97,42 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      {/* Show the navigation sidebar only on non-dashboard pages */}
+      {!isDashboardHome && <Sidebar />}
+
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b bg-white px-4 md:px-6">
-          <div className="flex items-center gap-3 md:hidden">
-            <span className="text-xl">🐾</span>
-            <span className="font-bold text-purple-700">Paw Tender Care</span>
+        <header className="flex h-14 items-center justify-between border-b bg-white px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <span className="text-xl">🐾</span>
+              <span className="font-bold text-purple-700">Paw Tender Care</span>
+            </Link>
           </div>
-          <div className="hidden md:block">
-            <p className="text-sm text-gray-500">
-              Welcome back, <span className="font-medium text-gray-900">{user?.user_metadata?.full_name || user?.email}</span>
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block">
+              <p className="text-sm text-gray-500">
+                Welcome, <span className="font-medium text-gray-900">{user?.user_metadata?.full_name || user?.email?.split("@")[0]}</span>
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/login";
+              }}
+              className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = "/login";
-            }}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            Sign Out
-          </button>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+        <main
+          className={cn(
+            "flex-1 overflow-hidden",
+            isDashboardHome
+              ? "" // Dashboard manages its own padding/scrolling (has sidebar inside)
+              : "overflow-y-auto p-4 md:p-6 pb-24 md:pb-6"
+          )}
+        >
           {children}
         </main>
         {/* Mobile Bottom Navigation */}
