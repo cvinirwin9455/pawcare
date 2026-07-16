@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
 
 const mobileNavItems = [
-  { name: "Home", href: "/dashboard", icon: "📊" },
+  { name: "Today", href: "/dashboard", icon: "📋" },
   { name: "Pets", href: "/pets", icon: "🐾" },
   { name: "Meds", href: "/medications", icon: "💊" },
   { name: "Appts", href: "/appointments", icon: "📅" },
@@ -134,7 +134,7 @@ export default function DashboardLayout({
           className={cn(
             "flex-1 overflow-hidden",
             isDashboardHome
-              ? "" // Dashboard manages its own padding/scrolling (has sidebar inside)
+              ? "" // Dashboard manages its own padding/scrolling
               : "overflow-y-auto p-4 md:p-6 pb-24 md:pb-6"
           )}
         >

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { PetSidebar } from "@/components/dashboard/PetSidebar";
+import { PetSidebar, SinglePetHeader } from "@/components/dashboard/PetSidebar";
 import { AddTaskModal } from "@/components/dashboard/AddTaskModal";
 import { cn, formatTime } from "@/lib/utils";
 import type { Pet, Medication, Appointment, CareTask, TaskCompletion } from "@/types/database";
@@ -60,7 +60,7 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch all data in parallel - care_tasks and task_completions may not exist yet
+    // Fetch all data in parallel
     const [petsRes, medsRes, aptsRes] = await Promise.all([
       supabase.from("pets").select("*").eq("user_id", user.id).eq("is_active", true).order("name"),
       supabase.from("medications").select("*, pets(name, species)").eq("user_id", user.id).eq("is_active", true),
@@ -85,7 +85,6 @@ export default function DashboardPage() {
       careTasksData = careTasksRes.data || [];
       completionsData = (completionsRes.data || []) as TaskCompletion[];
     } catch (err) {
-      // Tables don't exist yet - that's okay, just use empty arrays
       console.warn("care_tasks/task_completions tables not available:", err);
     }
 
@@ -95,6 +94,11 @@ export default function DashboardPage() {
 
     setPets(petsData);
     setCompletions(completionsData);
+
+    // For single-pet users, auto-select the pet
+    if (petsData.length === 1) {
+      setSelectedPetId(petsData[0].id);
+    }
 
     // Build unified task list
     const allTasks: DashboardTask[] = [];
@@ -159,10 +163,9 @@ export default function DashboardPage() {
 
     // 3. Generate tasks from care_tasks (check if they should show today)
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sunday
+    const dayOfWeek = today.getDay();
 
     for (const task of careTasksData) {
-      // Check if task is applicable today based on frequency
       const shouldShowToday = isTaskScheduledToday(task, dayOfWeek);
       if (!shouldShowToday) continue;
 
@@ -220,10 +223,8 @@ export default function DashboardPage() {
 
     try {
       if (task.isCompleted && task.completionId) {
-        // Un-complete: delete the completion record
         await supabase.from("task_completions").delete().eq("id", task.completionId);
       } else {
-        // Complete: insert a completion record
         await supabase.from("task_completions").insert({
           user_id: user.id,
           care_task_id: task.sourceType === "care_task" ? task.sourceId : null,
@@ -235,7 +236,6 @@ export default function DashboardPage() {
         });
       }
 
-      // Refresh data
       await fetchData();
     } catch (err) {
       console.error("Failed to toggle task:", err);
@@ -260,7 +260,9 @@ export default function DashboardPage() {
   const incompleteTasks = filteredTasks.filter((t) => !t.isCompleted);
   const completedTasks = filteredTasks.filter((t) => t.isCompleted);
 
-  // Get selected pet info
+  // Determine layout mode
+  const isSinglePet = pets.length === 1;
+  const singlePet = isSinglePet ? pets[0] : null;
   const selectedPet = selectedPetId ? pets.find((p) => p.id === selectedPetId) : null;
 
   if (loading) {
@@ -278,7 +280,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full">
-      {/* Pet Sidebar */}
+      {/* Pet Sidebar - only for multi-pet users */}
       <PetSidebar
         pets={pets}
         selectedPetId={selectedPetId}
@@ -289,10 +291,14 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-5 md:p-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {selectedPet ? `${selectedPet.name}'s Care` : "Today's Care Tasks"}
+              {isSinglePet
+                ? "Today's Care"
+                : selectedPet
+                ? `${selectedPet.name}'s Care`
+                : "Today's Care Tasks"}
             </h1>
             <p className="text-sm text-gray-400 mt-1">
               {new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date())}
@@ -311,8 +317,16 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Selected Pet Info Card */}
-        {selectedPet && (
+        {/* Single Pet Header - replaces the sidebar for single-pet users */}
+        {singlePet && (
+          <SinglePetHeader
+            pet={singlePet}
+            taskCount={taskCounts[singlePet.id] || { total: 0, completed: 0 }}
+          />
+        )}
+
+        {/* Multi-pet: Selected Pet Info Card */}
+        {!isSinglePet && selectedPet && (
           <div className="bg-white rounded-xl border shadow-sm p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-3xl">{speciesEmoji[selectedPet.species] || "🐾"}</span>
@@ -362,20 +376,20 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mb-6">
               <span className="text-4xl">
-                {selectedPet ? speciesEmoji[selectedPet.species] || "🐾" : "🐾"}
+                {singlePet ? speciesEmoji[singlePet.species] || "🐾" : "🐾"}
               </span>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {selectedPet
-                ? `No tasks for ${selectedPet.name} today`
-                : pets.length === 0
+              {pets.length === 0
                 ? "Welcome to Paw Tender Care!"
+                : singlePet
+                ? `No tasks for ${singlePet.name} today`
                 : "All caught up!"}
             </h3>
             <p className="text-sm text-gray-500 max-w-sm mx-auto text-center mb-6">
               {pets.length === 0
                 ? "Start by adding your first pet, then you can track their feeding, walks, medications, and appointments all in one place."
-                : "Add care tasks, medications, or appointments to see your daily checklist here."}
+                : "Add care tasks or medications to see your daily checklist here. Tap the button below to get started."}
             </p>
             <div className="flex gap-3">
               {pets.length === 0 ? (
@@ -386,20 +400,12 @@ export default function DashboardPage() {
                   + Add Your First Pet
                 </Link>
               ) : (
-                <>
-                  <button
-                    onClick={() => setShowAddTask(true)}
-                    className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
-                  >
-                    + Add Care Task
-                  </button>
-                  <Link
-                    href="/medications/new"
-                    className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    + Add Medication
-                  </Link>
-                </>
+                <button
+                  onClick={() => setShowAddTask(true)}
+                  className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
+                >
+                  + Add Your First Task
+                </button>
               )}
             </div>
           </div>
@@ -417,7 +423,7 @@ export default function DashboardPage() {
                   key={task.id}
                   task={task}
                   onToggle={() => toggleTask(task)}
-                  showPetName={!selectedPetId}
+                  showPetName={!isSinglePet && !selectedPetId}
                 />
               ))}
             </div>
@@ -436,7 +442,7 @@ export default function DashboardPage() {
                   key={task.id}
                   task={task}
                   onToggle={() => toggleTask(task)}
-                  showPetName={!selectedPetId}
+                  showPetName={!isSinglePet && !selectedPetId}
                 />
               ))}
             </div>
@@ -555,7 +561,6 @@ function isTaskScheduledToday(task: any, dayOfWeek: number): boolean {
       return true;
 
     case "every_other_day": {
-      // Simple approach: show on even days since task creation
       const created = new Date(task.created_at);
       const today = new Date();
       const daysDiff = Math.floor((today.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
@@ -563,7 +568,6 @@ function isTaskScheduledToday(task: any, dayOfWeek: number): boolean {
     }
 
     case "weekly": {
-      // Show on specified days, or if no days specified, show on the day it was created
       if (task.days_of_week && task.days_of_week.length > 0) {
         return task.days_of_week.includes(dayOfWeek);
       }
@@ -572,7 +576,6 @@ function isTaskScheduledToday(task: any, dayOfWeek: number): boolean {
     }
 
     case "custom":
-      // For custom, always show (user manages manually)
       return true;
 
     default:
